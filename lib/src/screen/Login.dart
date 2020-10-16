@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/src/screen/Dashboard.dart';
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -32,7 +33,13 @@ class _LoginState extends State<Login> {
           contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 20)),
     );
     final loginButton = RaisedButton(
-      onPressed: () {},
+      onPressed: () {
+        //Con el pushReplacementNamed quita todo el login, es decir no va a poder regresar atras
+        //Navigator.pushReplacementNamed(context, routeName)
+        //Navigator.pushNamed(context, '/dashboard');
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Dashboard()));
+      },
       child: Text('Validar usuario', style: TextStyle(color: Colors.white)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
