@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/src/models/userDAO.dart';
+import 'package:flutter_login/src/network/api_login.dart';
 import 'package:flutter_login/src/screen/Dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -8,9 +11,22 @@ class Login extends StatefulWidget {
   _LoginState createState() => _LoginState();
 }
 
+SharedPreferences preferences;
+bool _mantenersesion = false;
+
 class _LoginState extends State<Login> {
+  ApiLogin httpLogin = ApiLogin();
+  bool isValidating =
+      false; //Variable para controlar la visualización del indicador de progreso
+  static Future init() async {
+    preferences = await SharedPreferences.getInstance();
+  }
+
   @override
   Widget build(BuildContext context) {
+    TextEditingController txtUser = TextEditingController();
+    TextEditingController txtPasswd = TextEditingController();
+    //final labelTest = Labe
     final logo = CircleAvatar(
       radius: 35,
       backgroundImage: NetworkImage(
@@ -18,6 +34,7 @@ class _LoginState extends State<Login> {
       backgroundColor: Colors.transparent,
     );
     final txtEmail = TextFormField(
+      controller: txtUser,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         hintText: "ejem@mail.com",
@@ -26,19 +43,97 @@ class _LoginState extends State<Login> {
       ),
     );
     final txtPass = TextFormField(
+      controller: txtPasswd,
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
           hintText: 'contraseña',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 20)),
     );
+    final cajaRecordarSesion = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text("NO"),
+        Radio(
+          value: false,
+          groupValue: _mantenersesion,
+          onChanged: (bool value) {
+            setState(() {
+              _mantenersesion = value;
+            });
+          },
+        ),
+        Text("SI"),
+        Radio(
+          value: true,
+          groupValue: _mantenersesion,
+          onChanged: (bool value) {
+            setState(() {
+              _mantenersesion = value;
+            });
+          },
+        ),
+      ],
+    );
+
     final loginButton = RaisedButton(
-      onPressed: () {
+      onPressed: () async {
+        setState(() {
+          isValidating = true;
+        });
         //Con el pushReplacementNamed quita todo el login, es decir no va a poder regresar atras
         //Navigator.pushReplacementNamed(context, routeName)
         //Navigator.pushNamed(context, '/dashboard');
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Dashboard()));
+        UserDAO userDAO = UserDAO(user: txtUser.text, passwd: txtPasswd.text);
+        httpLogin.validar_usuario(userDAO).then((token) => {
+              if (token != null)
+                {
+                  guardarPreferencias(token),
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Dashboard()))
+                }
+              else
+                {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Error"),
+                          content: Text("Incorrect Credentials"),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('close'),
+                              onPressed: () => Navigator.of(context).pop(),
+                            )
+                          ],
+                        );
+                      })
+                }
+            });
+
+        /*setState(() {
+          UserDAO userDAO = UserDAO(user: txtUser.text, passwd: txtPasswd.text);
+          final token = httpLogin.validar_usuario(userDAO);
+          if (token != null) {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Dashboard()));
+          } else {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Error"),
+                    content: Text("Incorrect Credentials"),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('close'),
+                        onPressed: () => Navigator.of(context).pop(),
+                      )
+                    ],
+                  );
+                });
+          }
+        });*/
       },
       child: Text('Validar usuario', style: TextStyle(color: Colors.white)),
       shape: RoundedRectangleBorder(
@@ -46,6 +141,7 @@ class _LoginState extends State<Login> {
       ),
       color: Color.fromRGBO(67, 67, 67, 1),
     );
+
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
@@ -68,6 +164,11 @@ class _LoginState extends State<Login> {
                   SizedBox(height: 10),
                   txtPass,
                   SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[Text("Mantener Sesión Iniciada?")],
+                  ),
+                  cajaRecordarSesion,
                   loginButton,
                 ],
               ),
@@ -77,10 +178,18 @@ class _LoginState extends State<Login> {
           top: 240,
         ),
         Positioned(
-          top: 320,
-          child: CircularProgressIndicator(),
-        )
+            top: 320,
+            child: isValidating ? CircularProgressIndicator() : Container())
       ],
     );
+  }
+}
+
+guardarPreferencias(String token) async {
+  await _LoginState.init();
+  if (_mantenersesion) {
+    await preferences.setString("token", token);
+  } else {
+    await preferences.setString("token", "empty");
   }
 }
