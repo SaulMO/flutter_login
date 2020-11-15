@@ -24,8 +24,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController txtUser = TextEditingController();
-    TextEditingController txtPasswd = TextEditingController();
+    TextEditingController txtEmailController = TextEditingController();
+    TextEditingController txtPasswdController = TextEditingController();
     //final labelTest = Labe
     final logo = CircleAvatar(
       radius: 35,
@@ -34,7 +34,7 @@ class _LoginState extends State<Login> {
       backgroundColor: Colors.transparent,
     );
     final txtEmail = TextFormField(
-      controller: txtUser,
+      controller: txtEmailController,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         hintText: "ejem@mail.com",
@@ -43,7 +43,7 @@ class _LoginState extends State<Login> {
       ),
     );
     final txtPass = TextFormField(
-      controller: txtPasswd,
+      controller: txtPasswdController,
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
           hintText: 'contraseña',
@@ -84,11 +84,13 @@ class _LoginState extends State<Login> {
         //Con el pushReplacementNamed quita todo el login, es decir no va a poder regresar atras
         //Navigator.pushReplacementNamed(context, routeName)
         //Navigator.pushNamed(context, '/dashboard');
-        UserDAO userDAO = UserDAO(user: txtUser.text, passwd: txtPasswd.text);
+        UserDAO userDAO = UserDAO(
+            user: txtEmailController.text, passwd: txtPasswdController.text);
         httpLogin.validar_usuario(userDAO).then((token) => {
               if (token != null)
                 {
-                  guardarPreferencias(token),
+                  guardarPreferencias(
+                      token, txtEmailController.text, txtPasswdController.text),
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => Dashboard()))
                 }
@@ -185,11 +187,12 @@ class _LoginState extends State<Login> {
   }
 }
 
-guardarPreferencias(String token) async {
+guardarPreferencias(String token, String email, String contrasena) async {
   await _LoginState.init();
   if (_mantenersesion) {
     await preferences.setString("token", token);
   } else {
     await preferences.setString("token", "empty");
   }
+  await preferences.setString("email", email);
 }

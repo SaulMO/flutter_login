@@ -8,19 +8,31 @@ import 'package:flutter_login/src/network/api_movies.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatelessWidget {
-  const Dashboard({Key key}) : super(key: key);
+  Dashboard({Key key}) : super(key: key);
+  String _email;
+  String _token;
   actualizarPreferencias() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setString("token", "empty");
   }
 
-  Future checarPreferencias() async {
+  _getEmailPreferences() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    print(preferences.getString("token") ?? "empty");
+    _email = (preferences.getString("email") ?? "NO DATA");
+    print("E-MAIL " + _email);
+  }
+
+  _getTokenPreferences() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    _token = (preferences.getString("token") ?? "NO DATA");
+    print("TOKEN " + _token);
   }
 
   @override
   Widget build(BuildContext context) {
+    _getEmailPreferences();
+    _getTokenPreferences();
+
     DataBaseHelper dataBaseHelper = DataBaseHelper();
     Future<UserDAO> _objUser =
         dataBaseHelper.getUsuario('saulmondragonortega@gmail.com');
@@ -55,7 +67,7 @@ class Dashboard extends StatelessWidget {
                                   fit: BoxFit.cover),
                             ),
                       accountName: Text('Saúl Mondragón Ortega JR Programmer'),
-                      accountEmail: Text('saulmondragonortega@gmail.com'),
+                      accountEmail: Text(_email),
                       onDetailsPressed: () {
                         Navigator.pushNamed(context, '/profile');
                       },

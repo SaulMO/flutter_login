@@ -6,6 +6,7 @@ import 'package:flutter_login/src/database/database_helper.dart';
 import 'package:flutter_login/src/models/userDAO.dart';
 import 'package:flutter_login/src/screen/Dashboard.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   Profile({Key key}) : super(key: key);
@@ -14,8 +15,18 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String _nombre;
+  String _apeP;
+  String _apeM;
+  String _tel;
+  String _email;
+  _getEmailPreferences() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    _email = (preferences.getString("email") ?? "NO DATA");
+    print("EMAIL " + _email);
+  }
+
   //Nos permite tomar la fotografia ImagePicker
-  String _nombre, _apeP, _apeM, _tel, _email;
   final picker = ImagePicker();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String _imagePath = "";
@@ -24,11 +35,13 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+    _getEmailPreferences();
     _dataBase = DataBaseHelper();
   }
 
   @override
   Widget build(BuildContext context) {
+    _getEmailPreferences();
     final imgFinal = _imagePath == ""
         ? CircleAvatar(
             radius: 75,
@@ -63,7 +76,6 @@ class _ProfileState extends State<Profile> {
       },
     );
     final txtNombre = TextFormField(
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.name,
       initialValue: 'Saúl Mondragón Ortega',
       validator: (String value) {
@@ -80,7 +92,6 @@ class _ProfileState extends State<Profile> {
           hintText: 'Nombre'),
     );
     final txtApP = TextFormField(
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.name,
       initialValue: 'Mondragón',
       validator: (String value) {
@@ -97,7 +108,6 @@ class _ProfileState extends State<Profile> {
           hintText: 'Apellido Paterno'),
     );
     final txtApM = TextFormField(
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.name,
       initialValue: 'Ortega',
       validator: (String value) {
@@ -114,9 +124,8 @@ class _ProfileState extends State<Profile> {
           hintText: 'Apellido Materno'),
     );
     final txtEmail = TextFormField(
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.emailAddress,
-      initialValue: 'saulmondragonortega@gmail.com',
+      initialValue: _email,
       validator: (String value) {
         if (value.isEmpty) {
           return ("Campo Necesario");
@@ -128,7 +137,6 @@ class _ProfileState extends State<Profile> {
           hintText: 'E-mail'),
     );
     final txtTelefono = TextFormField(
-      textAlign: TextAlign.center,
       keyboardType: TextInputType.phone,
       initialValue: '4111228661',
       validator: (String value) {

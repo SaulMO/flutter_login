@@ -11,8 +11,11 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
+  MyApp({Key key}) : super(key: key);
+  @override
+  InicioState createState() => InicioState();
+  /*
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,6 +27,56 @@ class MyApp extends StatelessWidget {
         '/login': (BuildContext context) => Login(),
         '/dashboard': (BuildContext context) => Dashboard()
       },
+      home: Login(),
+    );
+  }*/
+}
+
+class InicioState extends State<MyApp> {
+  String _token;
+  String _email;
+  String _contrasena;
+
+  @override
+  void initState() {
+    super.initState();
+    _obtenerTodo();
+    /*_token = _prefs.then((SharedPreferences preferences) async {
+      return (preferences.getString('token'));
+    });
+    _email = _prefs.then((SharedPreferences preferences) async {
+      return (preferences.getString('email'));
+    });
+    _contrasena = _prefs.then((SharedPreferences preferences) async {
+      return (preferences.getString('contrasena'));
+    });*/
+  }
+
+  _obtenerTodo() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    _token = _prefs.getString('token');
+    _email = _prefs.getString('email');
+    _contrasena = _prefs.getString('contrasena');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("TOKEN");
+    print(_token);
+    print("E-MAIL");
+    print(_email);
+    print("TOKEN");
+    print(_contrasena);
+    return MaterialApp(
+      routes: {
+        '/trending': (BuildContext context) => Trending(),
+        '/favourites': (BuildContext context) => Favourites(),
+        '/profile': (BuildContext context) => Profile(),
+        '/search': (BuildContext context) => Search(),
+        '/login': (BuildContext context) => Login(),
+        '/dashboard': (BuildContext context) => Dashboard()
+      },
+      home: ((_token == "empty" || _token == null) ? Login() : Dashboard()),
     );
   }
 }
