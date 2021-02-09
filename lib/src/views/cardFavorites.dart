@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login/src/models/favoriteDAO.dart';
-import 'package:flutter_login/src/models/trendingDAO.dart';
 
-class CardTrending extends StatelessWidget {
-  const CardTrending({Key key, @required this.trending}) : super(key: key);
-  final Result2 trending;
+class CardFavoritos extends StatelessWidget {
+  const CardFavoritos({Key key, @required this.favoritos}) : super(key: key);
+  final FavoriteDAO favoritos;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,7 +22,7 @@ class CardTrending extends StatelessWidget {
               child: FadeInImage(
                 placeholder: AssetImage('assets/activity_indicator.gif'),
                 image: NetworkImage(
-                    'https://image.tmdb.org/t/p/w500/${trending.backdropPath}'),
+                    'https://image.tmdb.org/t/p/w500/${favoritos.backdropPath}'),
                 fadeInDuration: Duration(milliseconds: 100),
                 //height: 180,
               ),
@@ -38,30 +36,9 @@ class CardTrending extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      trending.title,
+                      favoritos.title,
                       style: TextStyle(color: Colors.white),
                     ),
-                    FlatButton(
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Icon(
-                        Icons.chevron_right,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/detail', arguments: {
-                          'popularity': trending.popularity,
-                          'voteCount': trending.voteCount,
-                          'video': trending.video,
-                          'posterPath': trending.posterPath,
-                          'id': trending.id,
-                          'backdropPath': trending.backdropPath,
-                          'title': trending.title,
-                          'voteAverage': trending.voteAverage,
-                          'overview': trending.overview,
-                          'releaseDate': trending.releaseDate,
-                        });
-                      },
-                    )
                   ],
                 ),
               ),

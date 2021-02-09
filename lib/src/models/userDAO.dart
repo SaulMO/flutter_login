@@ -13,6 +13,7 @@ class UserDAO {
   String foto;
 
 //id INTEGER PRIMARY,nomUser varchar(25),apepUser varchar(25),apemUser varchar(25),telUser char(10),mailUser varchar(40),foto varchar(200))
+  UserDAO.login(this.mailUser, this.passwd);
 
   UserDAO(
       {this.id,
@@ -48,6 +49,10 @@ class UserDAO {
       "user": user,
       "passwd": passwd
     };
+  }
+
+  Map<String, dynamic> toJSONLogin() {
+    return {"mailUser": mailUser, "passwd": passwd};
   }
 
   String userToJSON() {

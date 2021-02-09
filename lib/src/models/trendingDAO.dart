@@ -4,7 +4,7 @@ class Trending {
   int page;
   int totalResults;
   int totalPages;
-  List<Result> results;
+  List<Result2> results;
 
   Trending({
     this.page,
@@ -14,7 +14,7 @@ class Trending {
   });
 }
 
-class Result {
+class Result2 {
   double popularity;
   int voteCount;
   bool video;
@@ -28,8 +28,8 @@ class Result {
   String overview;
   String releaseDate;
 
-  factory Result.fromJSON(Map<String, dynamic> map) {
-    return Result(
+  factory Result2.fromJSON(Map<String, dynamic> map) {
+    return Result2(
         popularity: map['popularity'],
         voteCount: map['vote_count'],
         video: map['video'],
@@ -44,7 +44,7 @@ class Result {
         releaseDate: map['release_date']);
   }
 
-  Result({
+  Result2({
     this.popularity,
     this.voteCount,
     this.video,
@@ -58,6 +58,20 @@ class Result {
     this.overview,
     this.releaseDate,
   });
+  //(id INTEGER PRIMARY KEY, posterPath text, backdropPath text, title text, adult integer, voteAverage numeric, overview text, releaseDate text, favorite integer)");
+  Map<String, dynamic> toFullJSON() {
+    return {
+      "posterPath": posterPath,
+      "id": id,
+      "backdropPath": backdropPath,
+      "title": title,
+      "voteAverage": voteAverage,
+      "releaseDate": releaseDate,
+      "adult": 0,
+      "overview": overview,
+      "favorite": 1
+    };
+  }
 }
 
 enum OriginalLanguage { EN, JA, FR, KO }

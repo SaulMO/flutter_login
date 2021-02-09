@@ -1,5 +1,5 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_login/src/assets/configuration.dart';
 import 'package:flutter_login/src/database/database_helper.dart';
@@ -9,35 +9,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatelessWidget {
   Dashboard({Key key}) : super(key: key);
-  String _email;
-  String _token;
+  Widget imagePath;
+
   actualizarPreferencias() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setString("token", "empty");
+    await preferences.setString("usuario", "");
   }
 
-  _getEmailPreferences() async {
+  Future<UserDAO> getUsuario() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    _email = (preferences.getString("email") ?? "NO DATA");
-    print("E-MAIL " + _email);
-  }
+    Map usuarioMapeado = jsonDecode(preferences.getString('usuario'));
+    UserDAO usuarioReturn = UserDAO.fromJSON(usuarioMapeado);
+    imagePath = (usuarioReturn.foto == null || usuarioReturn.foto == "")
+        ? CircleAvatar(
+            radius: 35,
+            backgroundImage:
+                NetworkImage('https://thispersondoesnotexist.com/image'),
+            backgroundColor: Colors.transparent,
+          )
+        : ClipOval(
+            child: Image.file(File(usuarioReturn.foto), fit: BoxFit.cover),
+          );
 
-  _getTokenPreferences() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    _token = (preferences.getString("token") ?? "NO DATA");
-    print("TOKEN " + _token);
+    return UserDAO.fromJSON(usuarioMapeado);
   }
 
   @override
   Widget build(BuildContext context) {
-    _getEmailPreferences();
-    _getTokenPreferences();
-
     DataBaseHelper dataBaseHelper = DataBaseHelper();
-    Future<UserDAO> _objUser =
-        dataBaseHelper.getUsuario('saulmondragonortega@gmail.com');
     ApiMovies apiMovies = ApiMovies();
     apiMovies.getTrending();
+    Future<UserDAO> usuario = getUsuario();
 
     return Container(
       child: Scaffold(
@@ -47,7 +50,7 @@ class Dashboard extends StatelessWidget {
         ),
         drawer: Drawer(
           child: FutureBuilder(
-              future: _objUser,
+              future: usuario,
               builder: (BuildContext context, AsyncSnapshot<UserDAO> snapshot) {
                 return ListView(
                   children: <Widget>[
@@ -55,7 +58,10 @@ class Dashboard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Configuration.colorApp,
                       ),
-                      currentAccountPicture: snapshot.data == null
+                      currentAccountPicture: imagePath,
+                      /*(snapshot.data.foto == null ||
+                              snapshot.data.foto ==
+                                  'https://thispersondoesnotexist.com/image')
                           ? CircleAvatar(
                               radius: 35,
                               backgroundImage: NetworkImage(
@@ -65,9 +71,13 @@ class Dashboard extends StatelessWidget {
                           : ClipOval(
                               child: Image.file(File('snapshot.data.foto'),
                                   fit: BoxFit.cover),
-                            ),
-                      accountName: Text('Saúl Mondragón Ortega JR Programmer'),
-                      accountEmail: Text(_email),
+                            ),*/
+                      accountName: Text(snapshot.data != null
+                          ? "${snapshot.data.nomUser} ${snapshot.data.apepUser}"
+                          : "NO DATA"),
+                      accountEmail: Text(snapshot.data != null
+                          ? "${snapshot.data.mailUser}"
+                          : "NO DATA"),
                       onDetailsPressed: () {
                         Navigator.pushNamed(context, '/profile');
                       },
@@ -136,7 +146,7 @@ class Dashboard extends StatelessWidget {
     );
   }
 }
-
+/*
 class Menu extends StatelessWidget {
   const Menu({Key key}) : super(key: key);
   @override
@@ -144,3 +154,4 @@ class Menu extends StatelessWidget {
     return Container();
   }
 }
+*/

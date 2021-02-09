@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/src/models/trending.dart';
+import 'package:flutter_login/src/assets/configuration.dart';
+import 'package:flutter_login/src/models/trendingDAO.dart';
 import 'package:flutter_login/src/network/api_movies.dart';
 import 'package:flutter_login/src/views/card_trending.dart';
 
@@ -21,11 +22,12 @@ class _TrendingState extends State<Trending> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Configuration.colorApp,
         title: Text('Trending Movies'),
       ),
       body: FutureBuilder(
         future: apiMovies.getTrending(),
-        builder: (BuildContext context, AsyncSnapshot<List<Result>> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<Result2>> snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error at request time ;('));
           } else if (snapshot.connectionState == ConnectionState.done) {
@@ -40,10 +42,10 @@ class _TrendingState extends State<Trending> {
     );
   }
 
-  Widget _listViewTrending(List<Result> movies) {
+  Widget _listViewTrending(List<Result2> movies) {
     return ListView.builder(
       itemBuilder: (context, index) {
-        Result trending = movies[index];
+        Result2 trending = movies[index];
         return CardTrending(trending: trending);
       },
       itemCount: 20,

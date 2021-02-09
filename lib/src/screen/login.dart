@@ -1,25 +1,38 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_login/src/models/userDAO.dart';
 import 'package:flutter_login/src/network/api_login.dart';
-import 'package:flutter_login/src/screen/Dashboard.dart';
+import 'package:flutter_login/src/screen/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
-
   @override
   _LoginState createState() => _LoginState();
 }
 
-SharedPreferences preferences;
-bool _mantenersesion = false;
-
 class _LoginState extends State<Login> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   ApiLogin httpLogin = ApiLogin();
-  bool isValidating =
-      false; //Variable para controlar la visualización del indicador de progreso
-  static Future init() async {
-    preferences = await SharedPreferences.getInstance();
+  bool _mantenersesion = false;
+  //Variable para controlar la visualización del indicador de progreso
+  bool isValidating = false;
+  Future<SharedPreferences> _preferences = SharedPreferences.getInstance();
+
+  guardarPreferencias(String token, UserDAO user) async {
+    final SharedPreferences preferences = await _preferences;
+    String userJSON = jsonEncode(user.toJSON());
+    await preferences.setString("usuario", userJSON);
+    if (_mantenersesion) {
+      await preferences.setString("token", token);
+    } else {
+      await preferences.setString("token", " ");
+    }
   }
 
   @override
@@ -84,13 +97,12 @@ class _LoginState extends State<Login> {
         //Con el pushReplacementNamed quita todo el login, es decir no va a poder regresar atras
         //Navigator.pushReplacementNamed(context, routeName)
         //Navigator.pushNamed(context, '/dashboard');
-        UserDAO userDAO = UserDAO(
-            user: txtEmailController.text, passwd: txtPasswdController.text);
+        UserDAO userDAO =
+            UserDAO.login(txtEmailController.text, txtPasswdController.text);
         httpLogin.validar_usuario(userDAO).then((token) => {
               if (token != null)
                 {
-                  guardarPreferencias(
-                      token, txtEmailController.text, txtPasswdController.text),
+                  guardarPreferencias(token, userDAO),
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => Dashboard()))
                 }
@@ -112,30 +124,6 @@ class _LoginState extends State<Login> {
                       })
                 }
             });
-
-        /*setState(() {
-          UserDAO userDAO = UserDAO(user: txtUser.text, passwd: txtPasswd.text);
-          final token = httpLogin.validar_usuario(userDAO);
-          if (token != null) {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Dashboard()));
-          } else {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text("Error"),
-                    content: Text("Incorrect Credentials"),
-                    actions: <Widget>[
-                      FlatButton(
-                        child: Text('close'),
-                        onPressed: () => Navigator.of(context).pop(),
-                      )
-                    ],
-                  );
-                });
-          }
-        });*/
       },
       child: Text('Validar usuario', style: TextStyle(color: Colors.white)),
       shape: RoundedRectangleBorder(
@@ -143,7 +131,6 @@ class _LoginState extends State<Login> {
       ),
       color: Color.fromRGBO(67, 67, 67, 1),
     );
-
     return Stack(
       alignment: Alignment.bottomCenter,
       children: <Widget>[
@@ -185,14 +172,4 @@ class _LoginState extends State<Login> {
       ],
     );
   }
-}
-
-guardarPreferencias(String token, String email, String contrasena) async {
-  await _LoginState.init();
-  if (_mantenersesion) {
-    await preferences.setString("token", token);
-  } else {
-    await preferences.setString("token", "empty");
-  }
-  await preferences.setString("email", email);
 }

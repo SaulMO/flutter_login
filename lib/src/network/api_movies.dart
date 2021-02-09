@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter_login/src/models/trending.dart';
+import 'package:flutter_login/src/models/trendingDAO.dart';
 import 'package:http/http.dart' show Client;
 
 class ApiMovies {
@@ -7,12 +7,12 @@ class ApiMovies {
       "https://api.themoviedb.org/3/movie/popular?api_key=632febd594b02e1f0f33532ce968dd01&language=en-US&page=1";
   Client http = Client();
 
-  Future<List<Result>> getTrending() async {
+  Future<List<Result2>> getTrending() async {
     final response = await http.get(URL_TRENDING);
     if (response.statusCode == 200) {
       var movies = jsonDecode(response.body)['results'] as List;
-      List<Result> moviesList =
-          movies.map((movie) => Result.fromJSON(movie)).toList();
+      List<Result2> moviesList =
+          movies.map((movie) => Result2.fromJSON(movie)).toList();
       return moviesList;
     } else {
       return null;
